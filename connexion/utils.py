@@ -131,8 +131,21 @@ def is_json_mimetype(mimetype):
     :type mimetype: str
     :rtype: bool
     """
-    maintype, subtype = mimetype.split('/')  # type: str, str
-    return maintype == 'application' and (subtype == 'json' or subtype.endswith('+json'))
+    simple_mime_type, optional_parameter = mimetype.split(";") if \
+        ";" in mimetype else \
+        (mimetype, None)
+    if "/" not in simple_mime_type:
+        return False
+    maintype, subtype = simple_mime_type.split('/')  # type: str, str
+
+    is_valid_main_type = (maintype == 'application')
+    is_valid_subtype = (subtype == 'json' or subtype.endswith('+json'))
+    is_valid_optional_parameter = (
+            optional_parameter is None or
+            optional_parameter.strip() == "charset=utf-8"
+    )
+
+    return is_valid_main_type and is_valid_subtype and is_valid_optional_parameter
 
 
 def all_json(mimetypes):
